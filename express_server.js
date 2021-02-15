@@ -54,9 +54,16 @@ app.get('/u/:shortURL', (req, res) => {
 app.post('/urls',(req,res)=>{
   let shortURL = generateRandomString()
   urlDatabase[shortURL] = req.body.longURL
-  console.log(urlDatabase)
   res.redirect(`/urls/${shortURL}`)
 })
+
+app.post('/urls/:shortURL/delete',(req,res)=>{
+  delete urlDatabase[req.params.shortURL]
+  console.log(urlDatabase)
+  res.redirect(`/urls`)
+})
+
+
 
 app.listen(PORT, () => {
   console.log(`Server connect ${PORT}!`);
