@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/chonie1/tinyapp/issues"
   },
-  "homepage": "https://github.com/chonie1/tinyapp#readme"
+  "homepage": "https://github.com/chonie1/tinyapp#readme",
+  "dependencies": {
+    "expresss": "0.0.0"
+  }
 }
