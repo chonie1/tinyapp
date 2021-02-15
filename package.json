@@ -18,6 +18,8 @@
   },
   "homepage": "https://github.com/chonie1/tinyapp#readme",
   "dependencies": {
-    "expresss": "0.0.0"
+    "ejs": "^3.1.6",
+    "expresss": "0.0.0",
+    "morgan": "^1.10.0"
   }
 }

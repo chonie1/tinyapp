@@ -1,4 +1,5 @@
 const express = require('express')
+const morgan = require('morgan')
 const app = express();
 const PORT = 8080;
 
@@ -7,8 +8,15 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+//view engine
+app.set('view engine', 'ejs')
+
+// middleware
+app.use(morgan('dev')) //(req,res,next) => {}
+
+// get requests
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  res.send("Hello!"); 
 });
 
 app.get("/urls.json", (req, res) => {
