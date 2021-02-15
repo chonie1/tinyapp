@@ -22,9 +22,9 @@ app.use(morgan('dev')) //(req,res,next) => {}
 app.use(bodyParser.urlencoded({extended: true}))
 
 // get requests
-app.get("/", (req, res) => {
-  res.send("Hello!"); 
-});
+// app.get("/", (req, res) => {
+//   res.send("Hello!"); 
+// });
 
 app.get("/urls", (req, res) => {
   const templateVars = {
@@ -59,11 +59,13 @@ app.post('/urls',(req,res)=>{
 
 app.post('/urls/:shortURL/delete',(req,res)=>{
   delete urlDatabase[req.params.shortURL]
-  console.log(urlDatabase)
   res.redirect(`/urls`)
 })
 
-
+app.post('/urls/:shortURL',(req,res)=>{
+  urlDatabase[req.params.shortURL] = req.body.longURL
+  res.redirect(`/urls`)
+})
 
 app.listen(PORT, () => {
   console.log(`Server connect ${PORT}!`);
