@@ -3,13 +3,14 @@
 <head>
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
-  <title>URL - TinyApp Example</title>
+  <link rel="stylesheet" href='/css/styles.css'>
+  <title>Login - TinyApp</title>
 </head>
 
 <body>
 
   <%- include('partials/_header') %>
-  <h1>Login</h1>
+  <h3>Login</h3>
   <form action="/login" method="POST">
     <div class="form-group">
       <label for="email">Email Address</label>
@@ -19,7 +20,7 @@
       <label for="password">Password</label>
       <input type="password" class="form-control" name="password" placeholder="Password">
     </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <button type="submit" class="btn btn-primary">Login</button>
   </form>
 
   
