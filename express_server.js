@@ -38,6 +38,17 @@ function checkEmail(email) {
   return false;
 }
 
+function urlForUser(id) {
+  const userURLs = {}
+  
+  for(let url in urlDatabase) {
+    if (urlDatabase[url]['userId'] === id) {
+      userURLs[url] = urlDatabase[url]
+    }
+  }
+  return userURLs
+}
+
 //view engine
 app.set('view engine', 'ejs');
 
@@ -67,14 +78,14 @@ app.get("/login", (req, res) => {
 
 app.get("/urls", (req, res) => {
   
-  const userURLs = {}
   const userId = req.cookies['userId']
 
-  for(let url in urlDatabase) {
-    if (urlDatabase[url]['userId'] === userId) {
-      userURLs[url] = urlDatabase[url]
-    }
+  if(!userId) {
+    res.status
+    res.redirect('/login')
   }
+
+  const userURLs = urlForUser(userId)
   
   const templateVars = {
     user: userId,
@@ -88,7 +99,6 @@ app.get('/urls/new', (req, res) => {
     user: users[req.cookies['userId']],
   };
   
-  console.log(req.cookies['userId'])
 
   if (!req.cookies['userId']) {
     res.redirect('/login')
@@ -98,8 +108,15 @@ app.get('/urls/new', (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
+  
+  const userId = req.cookies['userId']
+
+  if (!req.cookies['userId']) {
+    res.redirect('/login')
+  }
+  
   const templateVars = {
-    user: users[req.cookies['userId']],
+    user: users[userId],
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL]['longURL']
   };
@@ -111,19 +128,46 @@ app.get('/u/:shortURL', (req, res) => {
 });
 
 app.post('/urls',(req,res)=>{
+
+  const userId = req.cookies['userId']
+
+  if(!userId) {
+    res.status(403).send('Must be logged in!')
+    res.redirect('/login')
+  }
+  
+  console.log(req.body)
   let shortURL = generateRandomString();
-  urlDatabase[shortURL] = req.body.longURL;
+  urlDatabase[shortURL] = {
+    'longURL': req.body.longURL,
+    'userId': userId
+  }
+
   res.redirect(`/urls/${shortURL}`);
 });
 
 app.post('/urls/:shortURL/delete',(req,res)=>{
+
+  if(!req.cookies['userId']) {
+    res.status(403).send('Must be logged in!')
+    res.redirect('/login')
+  }
+
   delete urlDatabase[req.params.shortURL];
   res.redirect(`/urls`);
+  
+
 });
 
 app.post('/urls/:shortURL',(req,res)=>{
-  urlDatabase[req.params.shortURL] = req.body.longURL;
-  res.redirect(`/urls`);
+
+  if(!req.cookies['userId']) {
+    res.status(403).send('Must be logged in!')
+    res.redirect('/login')
+  }
+
+  urlDatabase[req.params.shortURL]['longURL'] = req.body.longURL;
+  res.redirect('/urls');
 });
 
 app.post('/login',(req, res)=>{
@@ -133,7 +177,7 @@ app.post('/login',(req, res)=>{
   if (!password || !email) {
     res.status(400);
     res.send('Missing email/password field(s)!');
-    res.redirect('login');
+    res.redirect('/login');
   }
 
   const userId = checkEmail(email);
