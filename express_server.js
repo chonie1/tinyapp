@@ -2,6 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const { response } = require('express');
 const app = express();
 const PORT = 8080;
 
@@ -10,9 +11,31 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
+
 //functions
 function generateRandomString() {
   return Math.random().toString(36).substr(2,6);
+}
+
+function checkEmail(email) {
+  for(const user of Object.values(users)){
+    if (user.email === email) {
+      return true;
+    } 
+  }
+  return false;
 }
 
 //view engine
@@ -28,23 +51,38 @@ app.get("/", (req, res) => {
   res.redirect('/urls');
 });
 
+app.get("/register", (req, res) => {
+  const templateVars = {
+    user: users[req.cookies['userId']]
+  }
+  res.render('register', templateVars)
+});
+
+app.get("/login", (req, res) => {
+  const templateVars = {
+    user: users[req.cookies['userId']]
+  }
+  res.render('login', templateVars)
+});
+
 app.get("/urls", (req, res) => {
   const templateVars = {
-    username: req.cookies['username'],
+    user: users[req.cookies['userId']],
     urls: urlDatabase
   };
-  // console.log(req.body)
-  // res.send('ok')
   res.render('urls_index', templateVars);
 });
 
 app.get('/urls/new', (req, res) => {
-  res.render('urls_new');
+  const templateVars = {
+    user: users[req.cookies['userId']],
+  };
+  res.render('urls_new', templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
-    username: req.cookies['username'],
+    user: users[req.cookies['userId']],
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL]
   };
@@ -77,9 +115,37 @@ app.post('/login',(req, res)=>{
 });
 
 app.post('/logout',(req, res)=>{
-  res.clearCookie('username');
-  res.redirect(`/urls`);
+  res.clearCookie('userId');
+  res.redirect('urls');
 });
+
+app.post('/register',(req, res)=>{
+
+  let email = req.body.email;
+  let password = req.body.password;
+
+  if (!password || !email) {
+    res.status(400)
+    res.send('Missing email/password field!')
+    res.redirect('register')
+  }
+
+  if (checkEmail(email)) {
+    res.status(400)
+    res.send('Email already in use!')
+    res.redirect('register')
+  }
+
+  let userId = generateRandomString();
+  users[userId] = {
+    'id': userId,
+    'email': email, 
+    'password': password
+  }
+  console.log(users)
+  res.cookie('userId', userId)
+  res.redirect('urls')
+})
 
 
 app.listen(PORT, () => {
