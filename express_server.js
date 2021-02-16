@@ -3,7 +3,7 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
-const {generateRandomString, getUserByEmail} = require('./helpers');
+const {generateRandomString, getUserByEmail, getUsersURLs} = require('./helpers');
 const app = express();
 const PORT = 8080;
 
@@ -25,17 +25,6 @@ const users = {
     password: bcrypt.hashSync("dishwasher-funk",10)
   }
 };
-
-function urlForUser(id) {
-  const userURLs = {};
-  
-  for (let url in urlDatabase) {
-    if (urlDatabase[url]['userId'] === id) {
-      userURLs[url] = urlDatabase[url];
-    }
-  }
-  return userURLs;
-}
 
 //setting up view engine and style sheets
 app.set('view engine', 'ejs');
@@ -77,7 +66,7 @@ app.get("/urls", (req, res) => {
     res.redirect('/login');
   }
 
-  const userURLs = urlForUser(userId);
+  const userURLs = getUsersURLs(userId, urlDatabase);
   
   const templateVars = {
     user: users[userId],
@@ -106,7 +95,11 @@ app.get("/urls/:shortURL", (req, res) => {
   if (!req.session.user_id) {
     res.redirect('/login');
   }
-  
+
+  if (!urlDatabase[req.params.shortURL]) {
+    res.status('404').send('Page does not exist!');
+  }
+
   const templateVars = {
     user: users[userId],
     shortURL: req.params.shortURL,
@@ -116,9 +109,15 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.get('/u/:shortURL', (req, res) => {
-  res.redirect(urlDatabase[req.params.shortURL]['longURL']);
+
+  if (!urlDatabase[req.params.shortURL]['longURL']) {
+    res.status(404).send('Invalid URL');
+  }
+
+  res.status(301).redirect(urlDatabase[req.params.shortURL]['longURL']);
 });
 
+//post requests
 app.post('/urls',(req,res)=>{
 
   const userId = req.session.user_id;
@@ -157,7 +156,7 @@ app.post('/urls/:shortURL',(req,res)=>{
   }
 
   urlDatabase[req.params.shortURL]['longURL'] = req.body.longURL;
-  res.redirect(`/urls/${req.params.shortURL}`);
+  res.redirect('/urls');
 });
 
 app.post('/login',(req, res)=>{
@@ -173,15 +172,13 @@ app.post('/login',(req, res)=>{
   const user = getUserByEmail(email, users);
 
   if (!user) {
-    res.status(403);
-    res.send('Email not found!');
+    res.status(403).send('Email not found!');
   }
 
   const hashedPass = user['password'];
 
   if (!bcrypt.compareSync(password, hashedPass)) {
-    res.status(403);
-    res.send('Wrong password!');
+    res.status(403).send('Wrong password!');
   }
 
   req.session.user_id = user.id;
@@ -199,14 +196,12 @@ app.post('/register',(req, res)=>{
   let password = bcrypt.hashSync(req.body.password, 10);
 
   if (!password || !email) {
-    res.status(400);
-    res.send('Missing email/password field(s)!');
+    res.status(400).send('Missing email/password field(s)!');
     res.redirect('register');
   }
 
   if (getUserByEmail(email, users)) {
-    res.status(400);
-    res.send('Email already in use!');
+    res.status(400).send('Email already in use!');
     res.redirect('register');
   }
 

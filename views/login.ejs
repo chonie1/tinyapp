@@ -8,20 +8,21 @@
 </head>
 
 <body>
-
   <%- include('partials/_header') %>
-  <h3>Login</h3>
-  <form action="/login" method="POST">
-    <div class="form-group">
-      <label for="email">Email Address</label>
-      <input type="email" class="form-control" name="email" aria-describedby="emailHelp" placeholder="Email Address">
-    </div>
-    <div class="form-group">
-      <label for="password">Password</label>
-      <input type="password" class="form-control" name="password" placeholder="Password">
-    </div>
-    <button type="submit" class="btn btn-primary">Login</button>
-  </form>
+  <div class='container wrapper'>
+    <h3>Login</h3>
+    <form action="/login" method="POST">
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" class="form-control" name="email" aria-describedby="emailHelp" placeholder="Email Address">
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" class="form-control" name="password" placeholder="Password">
+      </div>
+      <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+  </div>
 
   
   <!-- Bootstrap JS -->

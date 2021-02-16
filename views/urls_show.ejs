@@ -21,10 +21,10 @@
   </div>
 
   <!-- Editing the long URL -->
-  <div class="card text-center">
-    <div class="card-body">
-      <h2 class="card-title">Edit</h2>
-      <form class="form-inline" action="/urls/<%= shortURL %>" method="POST">
+  <div class="card text-center edit">
+    <h3 class="card-title">Edit</h3>
+      <div class="ml-auto mr-auto">
+      <form class="form-inline ml-auto mr-auto" action="/urls/<%= shortURL %>" method="POST">
         <div class="form-group mb-2">
           <label for="longURL">New URL:</label>
           <input class="form-control" type="text" name="longURL" placeholder="http://" style="width: 300px; margin: 1em">
@@ -32,6 +32,7 @@
         </div>
       </form>
     </div>
+  </div>
 
 
   

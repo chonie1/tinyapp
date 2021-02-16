@@ -1,4 +1,23 @@
+.wrapper {
+  margin-top: 2rem;
+  width: 50%;
+}
+
 .user {
   color: rgba(255,255,255,.5);
   padding-right: 1rem;
+  padding-bottom: 1rem;
+  padding-top: 0.5rem;
+}
+
+.logout {
+  margin-top: 0.5rem;
+}
+
+.edit {
+  background-color: rgba(247,247,247,1);
+}
+
+.edit h3 {
+  margin-top: 1rem;
 }
