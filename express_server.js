@@ -11,18 +11,18 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-const users = { 
+const users = {
   "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
+    id: "userRandomID",
+    email: "user@example.com",
     password: "purple-monkey-dinosaur"
   },
- "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
     password: "dishwasher-funk"
   }
-}
+};
 
 //functions
 function generateRandomString() {
@@ -30,10 +30,10 @@ function generateRandomString() {
 }
 
 function checkEmail(email) {
-  for(const user of Object.values(users)){
+  for (const user of Object.values(users)) {
     if (user.email === email) {
-      return true;
-    } 
+      return user.id;
+    }
   }
   return false;
 }
@@ -54,15 +54,15 @@ app.get("/", (req, res) => {
 app.get("/register", (req, res) => {
   const templateVars = {
     user: users[req.cookies['userId']]
-  }
-  res.render('register', templateVars)
+  };
+  res.render('register', templateVars);
 });
 
 app.get("/login", (req, res) => {
   const templateVars = {
     user: users[req.cookies['userId']]
-  }
-  res.render('login', templateVars)
+  };
+  res.render('login', templateVars);
 });
 
 app.get("/urls", (req, res) => {
@@ -110,8 +110,29 @@ app.post('/urls/:shortURL',(req,res)=>{
 });
 
 app.post('/login',(req, res)=>{
-  res.cookie('username', req.body.username);
-  res.redirect(`/urls`);
+  let email = req.body.email;
+  let password = req.body.password;
+
+  if (!password || !email) {
+    res.status(400);
+    res.send('Missing email/password field(s)!');
+    res.redirect('login');
+  }
+
+  const userId = checkEmail(email);
+
+  if (!userId) {
+    res.status(403);
+    res.send('Email not found!');
+  }
+
+  if (users[userId]['password'] !== password) {
+    res.status(403);
+    res.send('Wrong password!');
+  }
+
+  res.cookie('userId', userId);
+  res.redirect('urls');
 });
 
 app.post('/logout',(req, res)=>{
@@ -125,27 +146,27 @@ app.post('/register',(req, res)=>{
   let password = req.body.password;
 
   if (!password || !email) {
-    res.status(400)
-    res.send('Missing email/password field!')
-    res.redirect('register')
+    res.status(400);
+    res.send('Missing email/password field(s)!');
+    res.redirect('register');
   }
 
   if (checkEmail(email)) {
-    res.status(400)
-    res.send('Email already in use!')
-    res.redirect('register')
+    res.status(400);
+    res.send('Email already in use!');
+    res.redirect('register');
   }
 
   let userId = generateRandomString();
   users[userId] = {
     'id': userId,
-    'email': email, 
+    'email': email,
     'password': password
-  }
-  console.log(users)
-  res.cookie('userId', userId)
-  res.redirect('urls')
-})
+  };
+
+  res.cookie('userId', userId);
+  res.redirect('urls');
+});
 
 
 app.listen(PORT, () => {
