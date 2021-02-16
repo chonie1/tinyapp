@@ -2,7 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const { response } = require('express');
+const bcrypt = require('bcrypt')
 const app = express();
 const PORT = 8080;
 
@@ -15,12 +15,12 @@ const users = {
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: "password"
+    password: bcrypt.hashSync('password', 10)
   },
   "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk"
+    password: bcrypt.hashSync("dishwasher-funk",10)
   }
 };
 
@@ -185,7 +185,9 @@ app.post('/login',(req, res)=>{
     res.send('Email not found!');
   }
 
-  if (users[userId]['password'] !== password) {
+  const hashedPass = users[userId]['password']
+
+  if (!bcrypt.compareSync(password, hashedPass)) {
     res.status(403);
     res.send('Wrong password!');
   }
@@ -202,7 +204,7 @@ app.post('/logout',(req, res)=>{
 app.post('/register',(req, res)=>{
 
   let email = req.body.email;
-  let password = req.body.password;
+  let password = bcrypt.hashSync(req.body.password);
 
   if (!password || !email) {
     res.status(400);
