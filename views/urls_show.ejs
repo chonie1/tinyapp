@@ -11,8 +11,7 @@
 
   <%- include('partials/_header') %>
 
-  <div class="card text-center">
-      <div class="card-header"></div>
+  <div class="card text-center section">
       <div class="card-body">
         <h5 class="card-title">TinyURL for: <%= longURL %></h5>
         <p class="card-text">Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a></p>
@@ -22,7 +21,7 @@
 
   
   <!-- Editing the long URL -->
-  <div class="card text-center edit">
+  <div class="card text-center section-colored">
     <h3 class="card-title">Edit</h3>
     <div class="ml-auto mr-auto">
       <form class="form-inline ml-auto mr-auto" action="/urls/<%= shortURL %>?_method=PUT" method="POST">
@@ -36,25 +35,29 @@
   </div>
   
   <!-- Analytics -->
- <div class="card text-center analytics">
-   <h3 class="analytics-header">Analytics</h3>
+ <div class="card text-center analytics section">
+   <h3 class="mb-4">Analytics</h3>
    <h5>Total Number of Visits</h5>
    <p><%= urlData.length %></p>
    <h5>Total Number of Unique Visitors</h5>
    <p><%= urlData.filter((v,i,a)=>a.findIndex(t=>(t.visitorId === v.visitorId))===i).length %></p>
-  <h3 class="log">Log</h3>
+  </div>
+
+  <!-- Log section -->
+  <div class ="card text-center section-colored">
+   <h3 class="log">Log</h3>
    <table class="table table-striped">
     <thead>
       <tr>
-        <th class="analytics-table" scope="col">Time</th>
-        <th class="analytics-table" scope="col">Visitor Id</th>
+        <th class="log-table" scope="col">Time</th>
+        <th class="log-table" scope="col">Visitor Id</th>
       </tr>
     </thead>
     <tbody>
       <% for (elem of urlData) {%>
         <tr>
-          <td class="analytics-table"><%= elem.time %></td>
-          <td class="analytics-table"><%= elem.visitorId %></td>
+          <td class="log-table"><%= elem.time %></td>
+          <td class="log-table"><%= elem.visitorId %></td>
         </tr>
         <% }; %>
       </tbody>

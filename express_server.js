@@ -100,7 +100,7 @@ app.get('/urls/new', (req, res) => {
   res.render('urls_new', templateVars);
 });
 
-//short URL display page 
+//short URL display page
 app.get("/urls/:shortURL", (req, res) => {
   
   const userId = req.session.user_id;
@@ -111,8 +111,14 @@ app.get("/urls/:shortURL", (req, res) => {
     return;
   }
 
+  if (urlDatabase[shortURL]['userId'] !== userId) {
+    req.session.error = 'Invalid User';
+    req.session.status = 403;
+    res.status(403).redirect('/apology');
+  }
+
   if (!urlDatabase[shortURL]) {
-    res.status(404).redirect('/apology')
+    res.status(404).redirect('/apology');
     return;
   }
 
@@ -129,49 +135,48 @@ app.get("/urls/:shortURL", (req, res) => {
 // short URL to long URL redirect page
 app.get('/u/:shortURL', (req, res) => {
 
-  const shortURL = req.params.shortURL
+  const shortURL = req.params.shortURL;
   let longURL = urlDatabase[shortURL]['longURL'];
 
   if (!longURL) {
-    req.session.error = 'Invalid URL'
-    req.session.status = 404
-    res.status(404).redirect('/apology')
+    req.session.error = 'Invalid URL';
+    req.session.status = 404;
+    res.status(404).redirect('/apology');
     return;
   }
 
-  //appends https protocol if protocol is not specified 
-  const splitURL = longURL.split('/:///');
+  //appends https protocol if protocol is not specified
+  const splitURL = longURL.split('////');
   if (splitURL.length < 2) {
     longURL = 'https://' + longURL;
+    console.log(longURL);
   }
 
   //updates analytics
-  const timestamp = new Date()
+  const timestamp = new Date();
   timestamp.toLocaleString;
 
-  if(!req.session.visitor_id){
+  if (!req.session.visitor_id) {
     req.session.visitor_id = generateRandomString();
   }
   
   urlAnalytics[shortURL].push({
     visitorId: req.session.visitor_id,
     time: timestamp
-  })
+  });
 
-  console.log(urlAnalytics)
-  
   res.redirect(301, longURL);
 });
 
 //In case there is an error
-app.get('*', function(req, res){
+app.get('*', function(req, res) {
 
   const templateVars = {
     error: req.session.error,
     status: req.session.status
-  }
+  };
   
-  delete req.session.error; 
+  delete req.session.error;
   delete req.session.status;
 
   res.render('apology', templateVars);
@@ -184,9 +189,9 @@ app.post('/urls',(req,res)=>{
   const userId = req.session.user_id;
   
   if (!userId) {
-    req.session.error = 'Must be logged in'
-    req.session.status = 403
-    res.status(403).redirect('/apology')
+    req.session.error = 'Must be logged in';
+    req.session.status = 403;
+    res.status(403).redirect('/apology');
     return;
   }
   
@@ -207,27 +212,27 @@ app.post('/login',(req, res)=>{
   const { email, password } = req.body;
   
   if (!password || !email) {
-    req.session.error = 'Missing email or password field(s)'
-    req.session.status = 400
-    res.status(400).redirect('/apology')
+    req.session.error = 'Missing email or password field(s)';
+    req.session.status = 400;
+    res.status(400).redirect('/apology');
     return;
   }
   
   const user = getUserByEmail(email, users);
   
   if (!user) {
-    req.session.error = 'Email not found'
-    req.session.status = 403
-    res.status(403).redirect('/apology')
+    req.session.error = 'Email not found';
+    req.session.status = 403;
+    res.status(403).redirect('/apology');
     return;
   }
   
   const hashedPass = user['password'];
   
   if (!bcrypt.compareSync(password, hashedPass)) {
-    req.session.error = 'Wrong password'
-    req.session.status = 403
-    res.status(403).redirect('/apology')
+    req.session.error = 'Wrong password';
+    req.session.status = 403;
+    res.status(403).redirect('/apology');
     return;
   }
   
@@ -248,14 +253,14 @@ app.post('/register',(req, res)=>{
   if (!password || !email) {
     req.session.error = 'Missing email or password field(s)';
     req.session.status = 400;
-    res.status(400).redirect('/apology')
+    res.status(400).redirect('/apology');
     return;
   }
   
   if (getUserByEmail(email, users)) {
     req.session.error = 'Email already in use';
     req.session.status = 400;
-    res.status(400).redirect('/apology')
+    res.status(400).redirect('/apology');
     return;
   }
   
@@ -273,14 +278,24 @@ app.post('/register',(req, res)=>{
 //put & delete requests
 app.delete('/urls/:shortURL',(req,res)=>{
 
-  if (!req.session.user_id) {
-    req.session.error = 'Must be logged in'
-    req.session.status = 403
-    res.status(403).redirect('/apology')
+  const userId = req.session.user_id;
+  const shortURL = req.params.shortURL;
+
+  if (!userId) {
+    req.session.error = 'Must be logged in';
+    req.session.status = 403;
+    res.status(403).redirect('/apology');
     return;
   }
 
-  delete urlDatabase[req.params.shortURL];
+  if (urlDatabase[shortURL]['userId'] !== userId) {
+    req.session.error = 'Wrong User';
+    req.session.status = 403;
+    res.status(403).redirect('/apology');
+    return;
+  }
+
+  delete urlDatabase[shortURL];
   res.redirect('/urls');
   
 });
@@ -290,16 +305,22 @@ app.put('/urls/:shortURL',(req,res)=>{
   const userId = req.session.user_id;
   const shortURL = req.params.shortURL;
 
-  console.log(urlDatabase[shortURL]['id'])
   if (!userId || urlDatabase[shortURL]['userId'] !== userId) {
     req.session.error = 'Must be logged in';
     req.session.status = 403;
-    res.status(403).redirect('/apology')
+    res.status(403).redirect('/apology');
+    return;
+  }
+  
+  if (urlDatabase[shortURL]['userId'] !== userId) {
+    req.session.error = 'Wrong User';
+    req.session.status = 403;
+    res.status(403).redirect('/apology');
     return;
   }
 
   urlDatabase[shortURL]['longURL'] = req.body.longURL;
-  urlAnalytics[shortURL] = []
+  urlAnalytics[shortURL] = [];
 
   res.redirect('/urls');
 });

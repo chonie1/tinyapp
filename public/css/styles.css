@@ -10,36 +10,31 @@
   padding-top: 0.5rem;
 }
 
-.analytics-header {
-  margin: 2rem 0rem 2rem;
-}
-
 .analytics p {
   font-size: 1.5rem;
 }
 
-.analytics h4 {
-  margin-top: 2rem;
-  margin-bottom: 0rem;
-}
-
-.analytics-table {
+.log-table {
   width: 50%;
 }
 
-.log {
-  margin: 1rem 0rem 1rem;
+.table-striped > tbody > tr:nth-child(2n+1) > td, .table-striped > tbody > tr:nth-child(2n+1) > th {
+  background-color: white;
 }
 
+.log {
+  margin-bottom: 2rem;
+}
 
 .logout {
   margin-top: 0.5rem;
 }
 
-.edit {
-  background-color: rgba(247,247,247,1);
+.section {
+  padding: 2rem 1rem 2rem;
 }
 
-.edit h3 {
-  margin-top: 2rem;
+.section-colored {
+  padding: 2rem 0rem 2rem;
+  background-color: rgba(247,247,247,1);
 }
