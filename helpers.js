@@ -1,13 +1,10 @@
+// used to generate random user id, visitor id and shortURL
 function generateRandomString() {
   return Math.random().toString(36).substr(2,6);
 }
 
 function getUserByEmail(email, database) {
-  for (const user of Object.values(database)) {
-    if (user.email === email) {
-      return user;
-    }
-  }
+  return Object.values(database).find(user => user.email === email);
 }
 
 function getUsersURLs(id, database) {
