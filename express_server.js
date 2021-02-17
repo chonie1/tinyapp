@@ -112,7 +112,7 @@ app.get("/urls/:shortURL", (req, res) => {
   }
 
   if (!urlDatabase[shortURL]) {
-    res.status('404').send('Page does not exist!');
+    res.status(404).redirect('/apology')
     return;
   }
 
@@ -133,7 +133,9 @@ app.get('/u/:shortURL', (req, res) => {
   let longURL = urlDatabase[shortURL]['longURL'];
 
   if (!longURL) {
-    res.status(404).send('Invalid URL');
+    req.session.error = 'Invalid URL'
+    req.session.status = 404
+    res.status(404).redirect('/apology')
     return;
   }
 
@@ -161,6 +163,20 @@ app.get('/u/:shortURL', (req, res) => {
   res.redirect(301, longURL);
 });
 
+//In case there is an error
+app.get('*', function(req, res){
+
+  const templateVars = {
+    error: req.session.error,
+    status: req.session.status
+  }
+  
+  delete req.session.error; 
+  delete req.session.status;
+
+  res.render('apology', templateVars);
+});
+
 // post requests
 // generates a new short URL in the urlDatabase
 app.post('/urls',(req,res)=>{
@@ -168,7 +184,9 @@ app.post('/urls',(req,res)=>{
   const userId = req.session.user_id;
   
   if (!userId) {
-    res.status(403).send('Must be logged in!');
+    req.session.error = 'Must be logged in'
+    req.session.status = 403
+    res.status(403).redirect('/apology')
     return;
   }
   
@@ -189,21 +207,27 @@ app.post('/login',(req, res)=>{
   const { email, password } = req.body;
   
   if (!password || !email) {
-    res.status(400).send('Missing email/password field(s)!');
+    req.session.error = 'Missing email or password field(s)'
+    req.session.status = 400
+    res.status(400).redirect('/apology')
     return;
   }
   
   const user = getUserByEmail(email, users);
   
   if (!user) {
-    res.status(403).send('Email not found!');
+    req.session.error = 'Email not found'
+    req.session.status = 403
+    res.status(403).redirect('/apology')
     return;
   }
   
   const hashedPass = user['password'];
   
   if (!bcrypt.compareSync(password, hashedPass)) {
-    res.status(403).send('Wrong password!');
+    req.session.error = 'Wrong password'
+    req.session.status = 403
+    res.status(403).redirect('/apology')
     return;
   }
   
@@ -218,22 +242,24 @@ app.post('/logout',(req, res)=>{
 
 app.post('/register',(req, res)=>{
   
-  let email = req.body.email;
-  let password = bcrypt.hashSync(req.body.password, 10);
+  const email = req.body.email;
+  const password = bcrypt.hashSync(req.body.password, 10);
   
   if (!password || !email) {
-    res.status(400).send('Missing email/password field(s)!');
-    res.redirect('register');
+    req.session.error = 'Missing email or password field(s)';
+    req.session.status = 400;
+    res.status(400).redirect('/apology')
     return;
   }
   
   if (getUserByEmail(email, users)) {
-    res.status(400).send('Email already in use!');
-    res.redirect('register');
+    req.session.error = 'Email already in use';
+    req.session.status = 400;
+    res.status(400).redirect('/apology')
     return;
   }
   
-  let userId = generateRandomString();
+  const userId = generateRandomString();
   users[userId] = {
     'id': userId,
     'email': email,
@@ -248,7 +274,9 @@ app.post('/register',(req, res)=>{
 app.delete('/urls/:shortURL',(req,res)=>{
 
   if (!req.session.user_id) {
-    res.status(403).send('Must be logged in!');
+    req.session.error = 'Must be logged in'
+    req.session.status = 403
+    res.status(403).redirect('/apology')
     return;
   }
 
@@ -262,12 +290,16 @@ app.put('/urls/:shortURL',(req,res)=>{
   const userId = req.session.user_id;
   const shortURL = req.params.shortURL;
 
-  if (!userId || urlDatabase[shortURL]['id'] !== userId) {
-    res.status(403).send('Must be logged in!');
+  console.log(urlDatabase[shortURL]['id'])
+  if (!userId || urlDatabase[shortURL]['userId'] !== userId) {
+    req.session.error = 'Must be logged in';
+    req.session.status = 403;
+    res.status(403).redirect('/apology')
     return;
   }
 
   urlDatabase[shortURL]['longURL'] = req.body.longURL;
+  urlAnalytics[shortURL] = []
 
   res.redirect('/urls');
 });

@@ -36,31 +36,30 @@
   </div>
   
   <!-- Analytics -->
- <div class="card text-center">
-   <h3 class="card-title">Analytics</h3>
+ <div class="card text-center analytics">
+   <h3 class="analytics-header">Analytics</h3>
    <h5>Total Number of Visits</h5>
    <p><%= urlData.length %></p>
    <h5>Total Number of Unique Visitors</h5>
    <p><%= urlData.filter((v,i,a)=>a.findIndex(t=>(t.visitorId === v.visitorId))===i).length %></p>
-  <h5>Log</h5>
-
-   <table class="table">
+  <h3 class="log">Log</h3>
+   <table class="table table-striped">
     <thead>
       <tr>
-        <th scope="col">Time</th>
-        <th scope="col">Visitor Id</th>
+        <th class="analytics-table" scope="col">Time</th>
+        <th class="analytics-table" scope="col">Visitor Id</th>
       </tr>
     </thead>
     <tbody>
       <% for (elem of urlData) {%>
         <tr>
-          <td><%= elem.time %></td>
-          <td><%= elem.visitorId %></td>
+          <td class="analytics-table"><%= elem.time %></td>
+          <td class="analytics-table"><%= elem.visitorId %></td>
         </tr>
-      <% }; %>
-    </tbody>
-  </table>
- </div>
+        <% }; %>
+      </tbody>
+    </table>
+  </div>
   
   
   <!-- Bootstrap JS -->
