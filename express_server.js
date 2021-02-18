@@ -10,8 +10,8 @@ const PORT = 8080;
 
 //Databases for testing
 const urlDatabase = {
-  b6UTxQ: { longURL: "https://www.tsn.ca", userId: "userRandomID"},
-  i3BoGr: { longURL: "https://www.google.ca", userId: "userRandomID" }
+  b6UTxQ: { longURL: "https://www.tsn.ca", userId: "userRandomID", timeCreated: "Thu Feb 18 2021 17:52:47 GMT+0000"},
+  i3BoGr: { longURL: "https://www.google.ca", userId: "userRandomID", timeCreated: "Thu Feb 19 2021 17:52:47 GMT+0000" }
 };
 
 const users = {
@@ -28,7 +28,7 @@ const users = {
 };
 
 const urlAnalytics = {
-  b6UTxQ: [{visitorId: 123, time:'some time'}, {visitorId:123, time:'some other time'}],
+  b6UTxQ: [{visitorId: 123, time:'Thu Feb 18 2021 17:52:47 GMT+0000'}, {visitorId:123, time:'Thu Feb 20 2021 17:52:47 GMT+0000'}],
   i3BoGr: [{visitorId: 456, time:'some time'}]
 };
 
@@ -48,7 +48,7 @@ app.use(cookieSession({
 app.use(methodOverride('_method'));
 
 // getting ip addresses
-app.set('trust proxy', true)
+app.set('trust proxy', true);
 
 // get requests
 app.get("/", (req, res) => {
@@ -148,15 +148,9 @@ app.get('/u/:shortURL', (req, res) => {
     return;
   }
 
-  //appends https protocol if protocol is not specified
-  // const splitURL = longURL.split('////');
-  // if (!longURL.includes('http://') || !longURL.includes('https://')) {
-  //   longURL = 'https://' + longURL;
-  // }
-
   //updates analytics
   const timestamp = new Date();
-  timestamp.toLocaleString();
+  const time = timestamp.toString().split('(')[0];
 
   if (!req.session.visitor_id) {
     req.session.visitor_id = generateRandomString();
@@ -164,7 +158,7 @@ app.get('/u/:shortURL', (req, res) => {
   
   urlAnalytics[shortURL].push({
     visitorId: req.ip,
-    time: timestamp
+    time: time
   });
 
   res.redirect(302, longURL);
@@ -198,10 +192,13 @@ app.post('/urls',(req,res)=>{
   }
   
   const shortURL = generateRandomString();
+  const timestamp = new Date();
+  const time = timestamp.toString().split('(')[0];
 
   urlDatabase[shortURL] = {
     'longURL': req.body.longURL,
-    'userId': userId
+    'userId': userId,
+    'timeCreated': time
   };
 
   urlAnalytics[shortURL] = [];
