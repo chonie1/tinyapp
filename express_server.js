@@ -47,6 +47,9 @@ app.use(cookieSession({
 // override for put and delete methods
 app.use(methodOverride('_method'));
 
+// getting ip addresses
+app.set('trust proxy', true)
+
 // get requests
 app.get("/", (req, res) => {
   res.redirect('/urls');
@@ -146,26 +149,25 @@ app.get('/u/:shortURL', (req, res) => {
   }
 
   //appends https protocol if protocol is not specified
-  const splitURL = longURL.split('////');
-  if (splitURL.length < 2) {
-    longURL = 'https://' + longURL;
-    console.log(longURL);
-  }
+  // const splitURL = longURL.split('////');
+  // if (!longURL.includes('http://') || !longURL.includes('https://')) {
+  //   longURL = 'https://' + longURL;
+  // }
 
   //updates analytics
   const timestamp = new Date();
-  timestamp.toLocaleString;
+  timestamp.toLocaleString();
 
   if (!req.session.visitor_id) {
     req.session.visitor_id = generateRandomString();
   }
   
   urlAnalytics[shortURL].push({
-    visitorId: req.session.visitor_id,
+    visitorId: req.ip,
     time: timestamp
   });
 
-  res.redirect(301, longURL);
+  res.redirect(302, longURL);
 });
 
 //In case there is an error
